@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#0b0f19">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>GeoLive Monitor | Rastreo Multi-Usuario en Tiempo Real</title>
+
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+  <!-- PWA Manifest & Icons -->
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/svg+xml" href="icons/icon.svg">
+  <link rel="apple-touch-icon" href="icons/icon.svg">
+
+  <!-- Estilos Responsivos Mobile-First (Idénticos a GeoLive AppMovil) -->
+  <link rel="stylesheet" href="css/style.css">
+
+  <!-- Firebase SDK Compat v10 (DaaS - Database as a Service) -->
+  <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
+
+  <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+</head>
+<body class="mobile-app-body">
+
+  <!-- ======================================================== -->
+  <!-- 1. MAPA EN PANTALLA COMPLETA (Google Maps Calles)        -->
+  <!-- ======================================================== -->
+  <div id="map-fullscreen-wrapper">
+    <div id="map"></div>
+  </div>
+
+  <!-- ======================================================== -->
+  <!-- 2. BARRA SUPERIOR FLOTANTE                              -->
+  <!-- ======================================================== -->
+  <header class="floating-header">
+    <div class="header-capsule">
+      <div class="brand-pill">
+        <div class="brand-badge-icon">
+          <i class="fas fa-satellite"></i>
+        </div>
+        <div class="brand-info">
+          <div class="brand-title-line">
+            <h2>GeoLive</h2>
+            <span class="admin-role-tag">MONITOR</span>
+          </div>
+          <span id="app-status-pill" class="status-indicator online">
+            <span class="status-dot"></span> <span id="status-text">Escuchando usuarios (1000ms)...</span>
+          </span>
+        </div>
+      </div>
+
+      <div class="header-controls">
+        <!-- Contador de Usuarios Conectados en Tiempo Real -->
+        <div id="connected-users-badge" class="connected-badge" title="Usuarios conectados transmitiendo en vivo">
+          <i class="fas fa-users"></i> <span id="connected-count">0</span>
+        </div>
+
+        <!-- Indicador de latido 1000ms -->
+        <div class="heartbeat-badge active" id="heartbeat-badge" title="Ciclo de recepción cada 1000ms">
+          <span class="pulse-ring"></span>
+          <span class="heartbeat-core"></span>
+          <span class="heartbeat-label">1000ms</span>
+        </div>
+
+        <button id="btn-open-settings" class="mobile-icon-btn" aria-label="Ajustes" title="Ajustes de Firebase, API y Google Maps">
+          <i class="fas fa-cog"></i>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ======================================================== -->
+  <!-- 3. BOTONES DE ACCIÓN RÁPIDA FLOTANTES (Costado Derecho)  -->
+  <!-- ======================================================== -->
+  <div class="floating-fab-column">
+    <!-- Centrar en todos los usuarios conectados o en el seleccionado -->
+    <button id="btn-locate-me" class="fab-btn fab-primary" aria-label="Encuadrar Usuarios" title="Ver todos los usuarios / Centrar seleccionado">
+      <i class="fas fa-crosshairs"></i>
+    </button>
+
+    <!-- Alternar capas (Google Calles / Satélite Híbrido / Terreno) -->
+    <button id="btn-toggle-engine" class="fab-btn fab-secondary" aria-label="Cambiar Capa Google Maps" title="Cambiar capa de Google Maps">
+      <i class="fas fa-layer-group"></i>
+    </button>
+
+    <!-- Limpiar rastro de ruta -->
+    <button id="btn-clear-trail" class="fab-btn fab-secondary" aria-label="Limpiar Rastro" title="Limpiar trazado de rutas">
+      <i class="fas fa-eraser"></i>
+    </button>
+  </div>
+
+  <!-- ======================================================== -->
+  <!-- 4. BOTTOM SHEET ERGONÓMICO (Panel de Monitoreo Admin)    -->
+  <!-- ======================================================== -->
+  <section id="mobile-bottom-sheet" class="bottom-sheet expanded">
+    
+    <!-- Manija táctil de despliegue -->
+    <div class="sheet-handle-bar" id="sheet-handle">
+      <span class="sheet-pill-handle"></span>
+      <div class="sheet-drag-hint">
+        <span id="sheet-drag-title"><i class="fas fa-chevron-down"></i> Toca para minimizar</span>
+      </div>
+    </div>
+
+    <!-- CONTENIDO COMPACTO PRINCIPAL -->
+    <div class="sheet-main-bar">
+      
+      <!-- Selector de Usuarios Conectados en Tiempo Real -->
+      <div class="user-identity-box">
+        <div class="label-row-between">
+          <label for="user-select-dropdown"><i class="fas fa-users"></i> Usuarios Conectados en Tiempo Real:</label>
+          <button id="btn-sim-toggle" class="mini-sim-badge active" type="button" title="Alternar usuarios de demostración si no hay móviles transmitiendo">
+            <i class="fas fa-vial"></i> Demo Activa
+          </button>
+        </div>
+        <div class="input-with-btn">
+          <select id="user-select-dropdown" class="select-input">
+            <option value="ALL">🌐 Ver Todos los Usuarios Conectados</option>
+          </select>
+          <button id="btn-fit-all" class="btn btn-secondary" title="Encuadrar a todos en Google Maps">
+            <i class="fas fa-expand-arrows-alt"></i>
+          </button>
+        </div>
+
+        <!-- Chips Horizontales de Usuarios Conectados -->
+        <div id="connected-users-chips" class="connected-chips-strip"></div>
+      </div>
+
+      <!-- Botón Principal Gigante: Estado de Recepción GPS (1000ms) -->
+      <button id="btn-toggle-tracking" class="btn btn-transmit btn-large">
+        <i class="fas fa-satellite-dish"></i>
+        <span>Monitoreando GPS en Vivo (1000ms)</span>
+      </button>
+
+      <!-- Chips de Telemetría Esencial (Del Usuario Seleccionado) -->
+      <div class="quick-telemetry-row">
+        <div class="quick-chip">
+          <span class="chip-label"><i class="fas fa-tachometer-alt"></i> Velocidad</span>
+          <span class="chip-value" id="quick-speed">0.0 km/h</span>
+        </div>
+        <div class="quick-chip">
+          <span class="chip-label"><i class="fas fa-bullseye"></i> Precisión</span>
+          <span class="chip-value" id="quick-accuracy">-- m</span>
+        </div>
+        <div class="quick-chip">
+          <span class="chip-label"><i class="fas fa-battery-half"></i> Batería</span>
+          <span class="chip-value" id="quick-battery">--%</span>
+        </div>
+        <div class="quick-chip">
+          <span class="chip-label"><i class="fas fa-cloud-download-alt"></i> Envíos</span>
+          <span class="chip-value" id="quick-pings">0</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- CONTENIDO EXPANDIBLE (Detalle de Sensores del Usuario Seleccionado) -->
+    <div class="sheet-expanded-content">
+      <div class="card sheet-card">
+        <div class="card-header">
+          <h3 class="card-title">
+            <i class="fas fa-microchip" style="color: #10b981;"></i>
+            <span id="sensors-card-title">Sensores de tu Teléfono</span>
+          </h3>
+          <span class="timestamp-badge" id="telemetry-timestamp">--:--:--</span>
+        </div>
+
+        <div class="sensor-grid">
+          <div class="sensor-item highlight">
+            <span class="sensor-name"><i class="fas fa-map-marker-alt"></i> Latitud</span>
+            <span class="sensor-val" id="det-lat">--.------</span>
+          </div>
+          <div class="sensor-item highlight">
+            <span class="sensor-name"><i class="fas fa-map-marker-alt"></i> Longitud</span>
+            <span class="sensor-val" id="det-lng">--.------</span>
+          </div>
+          <div class="sensor-item">
+            <span class="sensor-name"><i class="fas fa-mountain"></i> Altitud</span>
+            <span class="sensor-val" id="det-altitude">-- m</span>
+          </div>
+          <div class="sensor-item">
+            <span class="sensor-name"><i class="fas fa-compass"></i> Rumbo</span>
+            <span class="sensor-val" id="det-heading">--</span>
+          </div>
+          <div class="sensor-item">
+            <span class="sensor-name"><i class="fas fa-route"></i> Distancia Recorrida</span>
+            <span class="sensor-val" id="det-distance">0 m</span>
+          </div>
+          <div class="sensor-item">
+            <span class="sensor-name"><i class="fas fa-sync-alt"></i> Giroscopio</span>
+            <span class="sensor-val" id="det-orientation" style="font-size: 0.8rem;">--</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================================================== -->
+  <!-- 5. MODAL DE AJUSTES (Firebase, API 1000ms y Google Maps) -->
+  <!-- ======================================================== -->
+  <div id="settings-modal" class="modal-overlay hidden">
+    <div class="modal-content mobile-modal">
+      <div class="modal-header">
+        <h2 style="font-size: 1.1rem; font-weight: 700;">
+          <i class="fas fa-sliders-h" style="color: #00f2fe;"></i> Configuración de Monitoreo
+        </h2>
+        <button id="btn-close-settings" class="mobile-icon-btn" aria-label="Cerrar">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <form id="form-settings">
+        <div class="modal-body">
+          <div class="device-input-group">
+            <label for="cfg-project-id"><i class="fab fa-google"></i> Firebase Project ID:</label>
+            <input type="text" id="cfg-project-id" class="input-text" value="appmovil-67ee7">
+            <small class="hint-text">
+              Consola: <a href="https://console.firebase.google.com/project/appmovil-67ee7/overview?hl=es-419" target="_blank" rel="noopener noreferrer" style="color: #00f2fe;">appmovil-67ee7</a> (Colección: <code>dispositivos</code>)
+            </small>
+          </div>
+
+          <div class="device-input-group">
+            <label for="cfg-api-key"><i class="fas fa-key"></i> Firebase Web API Key:</label>
+            <input type="text" id="cfg-api-key" class="input-text" placeholder="AIzaSy...">
+          </div>
+
+          <div class="device-input-group">
+            <label for="cfg-custom-api-url"><i class="fas fa-server"></i> Endpoint API Externa (1000ms - Opcional):</label>
+            <input type="url" id="cfg-custom-api-url" class="input-text" placeholder="Ej: http://localhost:3000/api/locations">
+            <small class="hint-text">Si tu otro proyecto expone una API HTTP, se consultará cada 1000ms junto con Firebase.</small>
+          </div>
+
+          <div class="device-input-group">
+            <label for="cfg-google-maps-key"><i class="fas fa-map-marked-alt"></i> Google Maps JavaScript API Key (Opcional):</label>
+            <input type="text" id="cfg-google-maps-key" class="input-text" placeholder="AIzaSy... (Usa Google Maps oficial por defecto)">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-primary btn-large" style="width: 100%;">
+            <i class="fas fa-save"></i> Guardar Ajustes
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Contenedor de Alertas Toast -->
+  <div id="toast-container"></div>
+
+  <!-- Scripts (Misma arquitectura modular de AppMovil) -->
+  <script src="js/firebase-config.js"></script>
+  <script src="js/map-monitor.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

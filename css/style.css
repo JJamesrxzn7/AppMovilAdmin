@@ -1,0 +1,820 @@
+:root {
+  --bg-main: #0b0f19;
+  --bg-surface: rgba(15, 23, 42, 0.88);
+  --bg-surface-elevated: rgba(30, 41, 59, 0.92);
+  --border-color: rgba(255, 255, 255, 0.12);
+  --border-accent: rgba(0, 242, 254, 0.35);
+  --text-main: #f8fafc;
+  --text-muted: #94a3b8;
+  --primary: #00f2fe;
+  --primary-gradient: linear-gradient(135deg, #00f2fe 0%, #4facfe 100%);
+  --accent-green: #10b981;
+  --accent-green-gradient: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  --accent-red-gradient: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  --accent-amber: #f59e0b;
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  position: fixed;
+  background-color: var(--bg-main);
+  color: var(--text-main);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ======================================================== */
+/* 1. MAPA EN PANTALLA COMPLETA (Google Maps)               */
+/* ======================================================== */
+#map-fullscreen-wrapper {
+  position: absolute;
+  inset: 0;
+  width: 100vw;
+  height: 100dvh;
+  height: 100vh;
+  z-index: 1;
+}
+
+#map {
+  width: 100%;
+  height: 100%;
+  background-color: #e5e3df;
+}
+
+/* ======================================================== */
+/* 2. HEADER FLOTANTE MÓVIL                                 */
+/* ======================================================== */
+.floating-header {
+  position: absolute;
+  top: max(12px, var(--safe-top));
+  left: 12px;
+  right: 12px;
+  z-index: 20;
+  pointer-events: none;
+}
+
+.header-capsule {
+  pointer-events: auto;
+  background: var(--bg-surface);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--border-color);
+  border-radius: 9999px;
+  padding: 6px 14px 6px 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+}
+
+.brand-pill {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.brand-badge-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--primary-gradient);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #0b0f19;
+  font-size: 1.1rem;
+  box-shadow: 0 0 12px rgba(0, 242, 254, 0.5);
+}
+
+.brand-title-line {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.brand-info h2 {
+  font-size: 0.95rem;
+  font-weight: 800;
+  line-height: 1.1;
+  background: linear-gradient(90deg, #ffffff, #00f2fe);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.admin-role-tag {
+  font-size: 0.58rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  padding: 2px 6px;
+  border-radius: 999px;
+  background: rgba(0, 242, 254, 0.16);
+  color: var(--primary);
+  border: 1px solid rgba(0, 242, 254, 0.4);
+}
+
+.status-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.7rem;
+  color: var(--text-muted);
+}
+
+.status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #94a3b8;
+  display: inline-block;
+  transition: all 0.3s ease;
+}
+
+.status-indicator.online .status-dot {
+  background: var(--accent-green);
+  box-shadow: 0 0 8px var(--accent-green);
+}
+
+.status-indicator.locating .status-dot {
+  background: var(--accent-amber);
+  box-shadow: 0 0 8px var(--accent-amber);
+  animation: pulse-indicator 1.2s infinite ease-in-out;
+}
+
+.header-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.connected-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(16, 185, 129, 0.18);
+  border: 1px solid rgba(16, 185, 129, 0.45);
+  color: #34d399;
+  border-radius: 9999px;
+  padding: 4px 10px;
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.heartbeat-badge {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid var(--border-color);
+  border-radius: 9999px;
+  padding: 4px 8px;
+  position: relative;
+}
+
+.heartbeat-core {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #64748b;
+  transition: all 0.2s ease;
+}
+
+.heartbeat-badge.active .heartbeat-core {
+  background: var(--primary);
+  box-shadow: 0 0 10px var(--primary);
+}
+
+.heartbeat-badge.flash .heartbeat-core {
+  transform: scale(1.6);
+  background: #ffffff;
+}
+
+.heartbeat-label {
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+.mobile-icon-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--border-color);
+  color: var(--text-main);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 0.95rem;
+  transition: all 0.2s ease;
+}
+
+.mobile-icon-btn:active {
+  transform: scale(0.92);
+  background: rgba(255, 255, 255, 0.18);
+}
+
+/* ======================================================== */
+/* 3. BOTONES DE ACCIÓN FLOTANTES (Costado Derecho)         */
+/* ======================================================== */
+.floating-fab-column {
+  position: absolute;
+  right: 14px;
+  top: 80px;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.fab-btn {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.15rem;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.45);
+  position: relative;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.fab-btn:active {
+  transform: scale(0.9);
+}
+
+.fab-primary {
+  background: var(--primary-gradient);
+  color: #0b0f19;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+}
+
+.fab-secondary {
+  background: var(--bg-surface-elevated);
+  backdrop-filter: blur(12px);
+  color: var(--text-main);
+  border: 1px solid var(--border-color);
+}
+
+/* ======================================================== */
+/* 4. BOTTOM SHEET FLOTANTE ERGONÓMICO                      */
+/* ======================================================== */
+.bottom-sheet {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 30;
+  background: var(--bg-surface);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-top: 1px solid var(--border-color);
+  border-radius: 24px 24px 0 0;
+  box-shadow: 0 -10px 35px rgba(0, 0, 0, 0.55);
+  transition: transform 0.35s cubic-bezier(0.32, 0.72, 0, 1);
+  max-height: 86vh;
+  display: flex;
+  flex-direction: column;
+  padding-bottom: max(14px, var(--safe-bottom));
+}
+
+.bottom-sheet.collapsed {
+  transform: translateY(calc(100% - 255px));
+}
+
+.bottom-sheet.expanded {
+  transform: translateY(0%);
+}
+
+.sheet-handle-bar {
+  padding: 10px 16px 6px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.sheet-pill-handle {
+  width: 44px;
+  height: 5px;
+  background: rgba(255, 255, 255, 0.25);
+  border-radius: 9999px;
+  transition: background 0.2s;
+}
+
+.sheet-handle-bar:active .sheet-pill-handle {
+  background: var(--primary);
+}
+
+.sheet-drag-hint {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Barra Principal Compacta */
+.sheet-main-bar {
+  padding: 0 16px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.user-identity-box {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.label-row-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.user-identity-box label {
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.mini-sim-badge {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--border-color);
+  color: var(--text-muted);
+  border-radius: 999px;
+  padding: 2px 8px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.mini-sim-badge.active {
+  background: rgba(0, 242, 254, 0.15);
+  border-color: rgba(0, 242, 254, 0.45);
+  color: var(--primary);
+}
+
+.connected-chips-strip {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  padding: 4px 0 2px;
+  scrollbar-width: none;
+}
+
+.connected-chips-strip::-webkit-scrollbar {
+  display: none;
+}
+
+.user-pill-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid var(--border-color);
+  color: #cbd5e1;
+  border-radius: 999px;
+  padding: 4px 10px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.user-pill-chip.active {
+  background: rgba(0, 242, 254, 0.2);
+  border-color: var(--primary);
+  color: #ffffff;
+  box-shadow: 0 0 10px rgba(0, 242, 254, 0.25);
+}
+
+.user-pill-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+}
+
+.btn-transmit {
+  width: 100%;
+  height: 48px;
+  border-radius: 14px;
+  font-size: 0.96rem;
+  font-weight: 700;
+  background: #f8fafc;
+  color: #0b0f19;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  border: 2px solid rgba(0, 242, 254, 0.55);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 18px rgba(0, 242, 254, 0.35);
+}
+
+.btn-transmit:active {
+  transform: scale(0.97);
+}
+
+.btn-transmit.paused-monitoring {
+  background: var(--accent-red-gradient) !important;
+  color: #ffffff !important;
+  border-color: transparent !important;
+  box-shadow: 0 4px 18px rgba(239, 68, 68, 0.4) !important;
+}
+
+/* Fila de Chips Rápidos de Telemetría */
+.quick-telemetry-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+}
+
+.quick-chip {
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 8px 6px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 2px;
+}
+
+.chip-label {
+  font-size: 0.62rem;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.chip-value {
+  font-size: 0.92rem;
+  font-weight: 800;
+  color: #ffffff;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Contenido Expandido */
+.sheet-expanded-content {
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 6px 16px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.sheet-card {
+  background: rgba(30, 41, 59, 0.7);
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
+  padding: 14px;
+}
+
+.input-with-btn {
+  display: flex;
+  gap: 8px;
+}
+
+.input-text, .select-input {
+  flex: 1;
+  height: 42px;
+  background: rgba(0, 0, 0, 0.45);
+  border: 1px solid var(--border-color);
+  color: #ffffff;
+  padding: 0 12px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  outline: none;
+}
+
+.input-text:focus, .select-input:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 10px rgba(0, 242, 254, 0.3);
+}
+
+.btn {
+  height: 42px;
+  padding: 0 14px;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  border: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.btn-primary {
+  background: var(--primary-gradient);
+  color: #0b0f19;
+}
+
+.btn-secondary {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--text-main);
+  border: 1px solid var(--border-color);
+}
+
+/* Cuadrícula de Sensores Detallados */
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.card-title {
+  font-size: 0.86rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.timestamp-badge {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+}
+
+.sensor-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+
+.sensor-item {
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.sensor-item.highlight {
+  border-color: var(--border-accent);
+  background: rgba(0, 242, 254, 0.05);
+}
+
+.sensor-name {
+  font-size: 0.68rem;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.sensor-val {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text-main);
+  font-variant-numeric: tabular-nums;
+}
+
+.sensor-item.highlight .sensor-val {
+  color: #00f2fe;
+}
+
+/* ======================================================== */
+/* 5. MARCADORES GPS MULTI-USUARIO SOBRE GOOGLE MAPS        */
+/* ======================================================== */
+.user-gps-pulse-marker {
+  position: relative;
+  width: 44px;
+  height: 44px;
+}
+
+.user-gps-radar-ring {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 38px;
+  height: 38px;
+  background: rgba(0, 242, 254, 0.32);
+  border: 1.5px solid rgba(0, 242, 254, 0.85);
+  border-radius: 50%;
+  animation: gps-wave 1.8s infinite ease-out;
+}
+
+.user-gps-pulse-marker.selected-marker .user-gps-radar-ring {
+  background: rgba(0, 242, 254, 0.45);
+  border: 2px solid #00f2fe;
+  box-shadow: 0 0 18px rgba(0, 242, 254, 0.7);
+}
+
+.user-gps-pointer {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  width: 24px;
+  height: 24px;
+  transition: transform 0.25s ease-out;
+  filter: drop-shadow(0 2px 5px rgba(0, 0, 0, 0.45));
+}
+
+.user-floating-tag {
+  position: absolute;
+  bottom: 42px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(15, 23, 42, 0.92);
+  border: 1px solid rgba(0, 242, 254, 0.45);
+  color: #ffffff;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  white-space: nowrap;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.35);
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  pointer-events: none;
+}
+
+.user-floating-tag .tag-speed {
+  color: #00f2fe;
+  font-weight: 800;
+}
+
+@keyframes gps-wave {
+  0% {
+    transform: scale(0.5);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(2.3);
+    opacity: 0;
+  }
+}
+
+@keyframes pulse-indicator {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+/* ======================================================== */
+/* 6. MODAL RESPONSIVO DE AJUSTES                           */
+/* ======================================================== */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  padding: 16px;
+}
+
+.modal-content.mobile-modal {
+  background: var(--bg-surface-elevated);
+  border: 1px solid var(--border-color);
+  border-radius: 20px;
+  width: 100%;
+  max-width: 480px;
+  padding: 20px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.7);
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.modal-body {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.device-input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.device-input-group label {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+.hint-text {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+}
+
+.modal-footer {
+  margin-top: 18px;
+}
+
+/* ======================================================== */
+/* 7. TOAST NOTIFICACIONES TÁCTILES                         */
+/* ======================================================== */
+#toast-container {
+  position: fixed;
+  top: 75px;
+  left: 16px;
+  right: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  z-index: 99;
+  pointer-events: none;
+}
+
+.toast {
+  pointer-events: auto;
+  background: rgba(15, 23, 42, 0.94);
+  backdrop-filter: blur(12px);
+  border-left: 4px solid var(--primary);
+  border-radius: 12px;
+  padding: 10px 14px;
+  color: #ffffff;
+  font-size: 0.82rem;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+  animation: toast-down 0.3s ease;
+}
+
+.toast-success { border-color: var(--accent-green); }
+.toast-warning { border-color: var(--accent-amber); }
+.toast-error { border-color: #ef4444; }
+
+@keyframes toast-down {
+  from {
+    transform: translateY(-20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.toast.fade-out {
+  opacity: 0;
+  transform: translateY(-20px);
+  transition: all 0.3s ease;
+}
+
+.hidden {
+  display: none !important;
+}
+
+/* Responsividad para pantallas medianas o escritorio (Igual a tu captura) */
+@media (min-width: 768px) {
+  .bottom-sheet {
+    max-width: 390px;
+    left: 20px;
+    right: auto;
+    bottom: 20px;
+    border-radius: 24px;
+    border: 1px solid var(--border-color);
+  }
+
+  .bottom-sheet.collapsed {
+    transform: translateY(calc(100% - 210px));
+  }
+
+  .floating-fab-column {
+    right: 24px;
+    top: 90px;
+  }
+}
+

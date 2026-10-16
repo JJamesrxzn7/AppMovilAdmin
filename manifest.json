@@ -1,0 +1,19 @@
+{
+  "name": "GeoLive Monitor - Panel de Rastreo Multi-Usuario",
+  "short_name": "GeoLive Admin",
+  "description": "Aplicación Progresiva (PWA) de monitoreo GPS multi-usuario en tiempo real (1000ms) con Google Maps y Firebase Firestore",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#0b0f19",
+  "theme_color": "#0b0f19",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["navigation", "productivity", "utilities"]
+}

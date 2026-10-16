@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="bg-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0f172a"/>
+      <stop offset="100%" stop-color="#020617"/>
+    </linearGradient>
+    <linearGradient id="accent-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00f2fe"/>
+      <stop offset="100%" stop-color="#4facfe"/>
+    </linearGradient>
+    <linearGradient id="radar-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#10b981"/>
+      <stop offset="100%" stop-color="#059669"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background rounded squircle -->
+  <rect width="512" height="512" rx="128" fill="url(#bg-grad)"/>
+  <rect width="500" height="500" x="6" y="6" rx="122" fill="none" stroke="#00f2fe" stroke-width="4" stroke-opacity="0.3"/>
+
+  <!-- Radar Circles -->
+  <circle cx="256" cy="256" r="180" fill="none" stroke="#00f2fe" stroke-width="4" stroke-opacity="0.15" stroke-dasharray="10 10"/>
+  <circle cx="256" cy="256" r="120" fill="none" stroke="#00f2fe" stroke-width="4" stroke-opacity="0.3"/>
+  <circle cx="256" cy="256" r="60" fill="none" stroke="#10b981" stroke-width="6" stroke-opacity="0.5"/>
+
+  <!-- Satellite / Navigation Pointer -->
+  <polygon points="256,110 330,370 256,310 182,370" fill="url(#accent-grad)" stroke="#ffffff" stroke-width="8" stroke-linejoin="round"/>
+
+  <!-- Center Pulse Dot -->
+  <circle cx="256" cy="256" r="18" fill="#10b981" stroke="#ffffff" stroke-width="6"/>
+</svg>
+

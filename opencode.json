@@ -1,0 +1,15 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "name": "AppMovilAdmin-GPS-Monitor",
+  "description": "Panel Administrativo de Monitoreo GPS Multi-Usuario en Tiempo Real (1000ms) con Google Maps y Firebase Firestore",
+  "version": "1.0.0",
+  "default_agent": "auditor",
+  "agent": {
+    "auditor": {
+      "description": "Agente auditor de código, monitoreo multi-usuario en Firestore, recepción cada 1000ms y Google Maps API",
+      "prompt": "Eres un auditor técnico senior especializado en aplicaciones móviles de monitoreo en tiempo real (1000ms), Google Maps y Firebase Firestore (DaaS). Evalúa la recepción simultánea de múltiples usuarios conectados, el renderizado en Google Maps y la telemetría de sensores.",
+      "steps": 10
+    }
+  }
+}
+

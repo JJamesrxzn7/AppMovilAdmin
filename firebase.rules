@@ -1,0 +1,20 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Permite lectura y monitoreo en tiempo real de todos los dispositivos conectados
+    // Proyecto compartido con AppMovil: appmovil-67ee7
+    match /dispositivos/{deviceId} {
+      allow read, write: if true;
+
+      // Subcolección de puntos de historial de telemetría (1000ms)
+      match /historial/{puntos} {
+        allow read, write: if true;
+      }
+    }
+
+    match /{document=**} {
+      allow read, write: if true;
+    }
+  }
+}
+
